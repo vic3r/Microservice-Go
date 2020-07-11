@@ -56,6 +56,6 @@ func main() {
 		log.Fatalf("Could not get consignments: %v", err)
 	}
 	for i, v := range response.Consignments {
-		log.Printf("Consignment %d =>  %v", i+1, v)
+		log.Printf("Consignment %d => %v", i+1, v)
 	}
 }
