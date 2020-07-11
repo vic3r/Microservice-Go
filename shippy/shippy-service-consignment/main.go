@@ -2,13 +2,11 @@ package main
 
 import (
 	"log"
-	"net"
 
+	"github.com/micro/go-micro/v2"
 	pb "github.com/vic3r/Microservice-Go/shippy/shippy-service-consignment/proto/consignment"
 	repository "github.com/vic3r/Microservice-Go/shippy/shippy-service-consignment/repository/storage"
 	svc "github.com/vic3r/Microservice-Go/shippy/shippy-service-consignment/service"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -18,17 +16,14 @@ const (
 func main() {
 	repository := &repository.Storage{}
 
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+	service := micro.NewService(
+		micro.Name("shippy.service.consignment"),
+	)
+	service.Init()
+	if err := pb.RegisterShippingServiceHandler(service.Server(), &svc.Service{Repository: repository}); err != nil {
+		log.Panic(err)
 	}
-	s := grpc.NewServer()
-	service := &svc.Service{Repository: repository}
-	pb.RegisterShippingServiceServer(s, service)
 
-	reflection.Register(s)
-
-	log.Println("Running on port:", port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
